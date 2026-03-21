@@ -1,23 +1,29 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 
 export async function GET() {
   const report: Record<string, string> = {}
 
   // ── 1. Verifica variáveis de ambiente ─────────────────────────────────────
-  report.EVOLUTION_API_URL      = process.env.EVOLUTION_API_URL      ? '✅ SET' : '❌ MISSING'
-  report.EVOLUTION_API_KEY      = process.env.EVOLUTION_API_KEY      ? '✅ SET' : '❌ MISSING'
-  report.ANTHROPIC_API_KEY      = process.env.ANTHROPIC_API_KEY      ? '✅ SET' : '❌ MISSING'
-  report.NEXT_PUBLIC_SUPABASE_URL       = process.env.NEXT_PUBLIC_SUPABASE_URL       ? '✅ SET' : '❌ MISSING'
-  report.NEXT_PUBLIC_SUPABASE_ANON_KEY  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY  ? '✅ SET' : '❌ MISSING'
+  report.EVOLUTION_API_URL             = process.env.EVOLUTION_API_URL             ? '✅ SET' : '❌ MISSING'
+  report.EVOLUTION_API_KEY             = process.env.EVOLUTION_API_KEY             ? '✅ SET' : '❌ MISSING'
+  report.ANTHROPIC_API_KEY             = process.env.ANTHROPIC_API_KEY             ? '✅ SET' : '❌ MISSING'
+  report.NEXT_PUBLIC_SUPABASE_URL      = process.env.NEXT_PUBLIC_SUPABASE_URL      ? '✅ SET' : '❌ MISSING'
+  report.NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ SET' : '❌ MISSING'
+  report.SUPABASE_SERVICE_ROLE_KEY     = process.env.SUPABASE_SERVICE_ROLE_KEY     ? '✅ SET' : '❌ MISSING'
 
-  // ── 2. Testa conexão com Supabase ─────────────────────────────────────────
+  // ── 2. Testa conexão com Supabase (admin — bypassa RLS) ───────────────────
   try {
-    const supabase = await createClient()
-    const { error } = await supabase.from('leads').select('id').limit(1)
-    report.supabase_connection = error ? `❌ ERRO: ${error.message}` : '✅ CONECTADO'
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.from('leads').select('id').limit(1)
+    if (error) {
+      report.supabase_admin = `❌ ERRO: ${error.message}`
+    } else {
+      report.supabase_admin = `✅ CONECTADO (admin) | leads na tabela: ok`
+    }
+    void data
   } catch (e: unknown) {
-    report.supabase_connection = `❌ EXCEÇÃO: ${e instanceof Error ? e.message : String(e)}`
+    report.supabase_admin = `❌ EXCEÇÃO: ${e instanceof Error ? e.message : String(e)}`
   }
 
   // ── 3. Testa conexão com Evolution API ────────────────────────────────────

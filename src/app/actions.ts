@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 // Envia mensagem via Evolution API (timeout 8s para não estourar o limite do Vercel)
@@ -31,7 +31,7 @@ async function notifyWpp(number: string, text: string): Promise<boolean> {
   } catch (e: unknown) {
     clearTimeout(timeout)
     if (e instanceof Error && e.name === 'AbortError') {
-      console.error('[WhatsApp] Timeout ao conectar na Evolution API. Verifique se o servidor está online e acessível.')
+      console.error('[WhatsApp] Timeout ao conectar na Evolution API.')
     } else {
       console.error('[WhatsApp] Erro de rede:', e)
     }
@@ -58,10 +58,10 @@ export async function submitLead(formData: FormData) {
     `\nVisão: ${vision}`,
   ].join('\n')
 
-  // 1. Salva no Banco de Dados (Supabase)
+  // 1. Salva no Banco de Dados (Supabase — admin client bypasses RLS)
   let dbOk = false
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const { error: dbError } = await supabase.from('leads').insert([{
       name, email, message: fullMessage
     }])
@@ -69,30 +69,40 @@ export async function submitLead(formData: FormData) {
       console.error('[Supabase] Erro ao inserir lead:', dbError.message, dbError.code)
     } else {
       dbOk = true
+      console.log('[Supabase] Lead salvo com sucesso:', email)
     }
   } catch (e) {
     console.error('[Supabase] Exceção:', e)
   }
 
-  // 2. Envia e-mail para atendimento@zacda.com.br via Web3Forms
+  // 2. Envia e-mail para atendimento@zacda.com.br via Web3Forms (JSON body)
   try {
-    const emailFd = new FormData()
-    emailFd.append('access_key', 'c08a4935-8981-45dd-bfc3-ddadd18d016d')
-    emailFd.append('subject', `[ZACDA] Novo Lead — ${name} | ${segment}`)
-    emailFd.append('from_name', 'ZACDA Site')
-    emailFd.append('replyto', email)
-    emailFd.append('redirect', 'false')
-    emailFd.append('Nome', name)
-    emailFd.append('E-mail', email)
-    emailFd.append('Telefone', phone || 'Não informado')
-    emailFd.append('Segmento', segment)
-    emailFd.append('Link Digital', digitalLink || 'Não informado')
-    emailFd.append('Visao e Objetivo', vision)
-    const emailRes = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: emailFd })
-    if (emailRes.ok) {
-      console.log('[Email] Enviado para atendimento@zacda.com.br via Web3Forms')
+    const emailPayload = {
+      access_key: 'c08a4935-8981-45dd-bfc3-ddadd18d016d',
+      subject: `[ZACDA] Novo Lead — ${name} | ${segment}`,
+      from_name: 'ZACDA Site',
+      replyto: email,
+      redirect: 'false',
+      Nome: name,
+      'E-mail': email,
+      Telefone: phone || 'Não informado',
+      Segmento: segment,
+      'Link Digital': digitalLink || 'Não informado',
+      'Visao e Objetivo': vision,
+    }
+    const emailRes = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(emailPayload),
+    })
+    const emailData = await emailRes.json().catch(() => ({}))
+    if (emailRes.ok && emailData.success) {
+      console.log('[Email] Enviado com sucesso via Web3Forms:', emailData.message)
     } else {
-      console.error('[Email] Web3Forms retornou:', emailRes.status, await emailRes.text().catch(() => ''))
+      console.error('[Email] Web3Forms retornou erro:', emailRes.status, JSON.stringify(emailData))
     }
   } catch (e) {
     console.error('[Email] Falha ao enviar:', e)
