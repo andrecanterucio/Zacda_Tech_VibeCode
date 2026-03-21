@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { submitLead } from './actions';
 import Link from 'next/link';
+import Script from 'next/script';
 
 export default function Home() {
   return (
@@ -623,10 +624,9 @@ export default function Home() {
   </footer>
 
   {/*  ═══════════════════════════════════════════════
-       JAVASCRIPT
+       JAVASCRIPT VIBE CODE (Dinâmicos)
   ═══════════════════════════════════════════════  */}
-  
-
+  <Script src="/main.js" strategy="lazyOnload" />
 
     </main>
   );
