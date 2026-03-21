@@ -132,7 +132,7 @@ export default function Home() {
           <div>
             <div className="section-tag">Nosso DNA</div>
             <h2 id="padrao-heading" className="padrao-title reveal">
-              O Padrão
+              O Padrão{' '}
               <span className="gradient-text">ZACDA</span>
               <span className="accent-line"></span>
             </h2>
@@ -260,7 +260,7 @@ export default function Home() {
       </div>
     </section>
 
-    {/*  ═══ OPERAÇÕES INTELIGENTES (n8n Automations) ═══  */}
+    {/*  ═══ OPERAÇÕES INTELIGENTES (Micro SaaS & IA) ═══  */}
     <section id="automations" aria-labelledby="automations-heading">
       <div className="container">
         <div className="auto-wrap">
@@ -274,7 +274,7 @@ export default function Home() {
               Não entregamos apenas arquitura digital. Construímos ecossistemas completos onde seu site conversa com seu CRM, WhatsApp e Agentes de IA em tempo real de forma fluida.
             </p>
             <ul className="auto-features">
-              <li><span className="auto-dot"></span> Integração nativa com automações n8n</li>
+              <li><span className="auto-dot"></span> Integração nativa para Micro SaaS e APIs autônomas</li>
               <li><span className="auto-dot"></span> Qualificação inteligente de leads por IA</li>
               <li><span className="auto-dot"></span> Acionamento de respostas por WhatsApp e E-mail</li>
             </ul>
@@ -283,7 +283,7 @@ export default function Home() {
           <div className="auto-widget reveal reveal-delay-2">
             <div className="widget-header">
               <div className="widget-dots"><span></span><span></span><span></span></div>
-              <div className="widget-title">Simulador de Fluxo (n8n)</div>
+              <div className="widget-title">Simulador de Fluxo Neural</div>
             </div>
             <div className="widget-body">
               <p className="widget-instru">Clique no botão abaixo para simular a entrada de um novo lead no seu funil autônomo:</p>
@@ -403,7 +403,7 @@ export default function Home() {
 
               <div className="form-group">
                 <label className="form-label" htmlFor="phone">
-                  Telefone
+                  Telefone{' '}
                   <span style={{}} /* TODO: convert inline styles */>OPCIONAL</span>
                 </label>
                 <input
@@ -456,7 +456,7 @@ export default function Home() {
 
               <div className="form-group">
                 <label className="form-label" htmlFor="digital-link">
-                  Link do Site ou Instagram
+                  Link do Site ou Instagram{' '}
                   <span style={{}} /* TODO: convert inline styles */>PARA ANÁLISE DA IA</span>
                 </label>
                 <input
