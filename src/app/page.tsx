@@ -7,7 +7,8 @@ import React, { useState } from 'react';
 
 export default function Home() {
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [leadData, setLeadData] = useState({ name: '', segment: '' });
+  const [leadData, setLeadData] = useState({ name: '', segment: '', digitalLink: '' });
+  const [linkValue, setLinkValue] = useState('');
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
   async function handleSelectPlan(plan: 'start' | 'grow' | 'pro') {
@@ -36,15 +37,19 @@ export default function Home() {
     setFormState('loading');
     const formData = new FormData(e.currentTarget);
     const segSelect = e.currentTarget.elements.namedItem('segment') as HTMLSelectElement;
-    setLeadData({
-      name: formData.get('entityName')?.toString() || '',
-      segment: segSelect?.options[segSelect.selectedIndex]?.text || ''
-    });
 
     try {
       const res = await submitLead(formData);
-      if (res?.success) setFormState('success');
-      else setFormState('error');
+      if (res?.success) {
+        setLeadData({
+          name: formData.get('entityName')?.toString() || '',
+          segment: segSelect?.options[segSelect.selectedIndex]?.text || '',
+          digitalLink: res.digitalLink || '',
+        });
+        setFormState('success');
+      } else {
+        setFormState('error');
+      }
     } catch {
       setFormState('error');
     }
@@ -519,18 +524,25 @@ export default function Home() {
           <div>
             {formState === 'success' ? (
               <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 2rem', animation: 'fade-in 0.8s ease' }}>
-                <h3 style={{ color: '#00ff41', fontFamily: "'Space Grotesk', sans-serif", marginBottom: '1.5rem', fontSize: '1.5rem' }}>Análise IA Concluída ✓</h3>
+                <h3 style={{ color: '#00ff41', fontFamily: "'Space Grotesk', sans-serif", marginBottom: '1.5rem', fontSize: '1.5rem' }}>Requisição Recebida ✓</h3>
                 <div style={{ textAlign: 'left', background: 'rgba(0,255,65,0.05)', border: '1px solid rgba(0,255,65,0.2)', borderRadius: '12px', padding: '1.5rem' }}>
                   <p style={{ color: 'var(--text-1)', fontSize: '0.9rem', marginBottom: '1rem', fontFamily: "'JetBrains Mono', monospace" }}>
                     &gt; 🧠 Agente IA: Olá, <strong style={{ color: '#00ff41' }}>{leadData.name}</strong>! Triamos sua requisição para o setor de <strong style={{ color: '#00e5ff' }}>{leadData.segment}</strong>.
                   </p>
+                  {leadData.digitalLink && (
+                    <div style={{ marginBottom: '1rem', padding: '10px 14px', background: 'rgba(0,229,255,0.06)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '8px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.82rem' }}>
+                      <span style={{ color: '#00e5ff' }}>&gt; 🔍 Link sob análise: </span>
+                      <strong style={{ color: '#fff' }}>{leadData.digitalLink}</strong>
+                      <span style={{ display: 'block', color: '#666', fontSize: '0.75rem', marginTop: '4px' }}>Nossa IA irá inspecionar e preparar um diagnóstico personalizado.</span>
+                    </div>
+                  )}
                   <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', lineHeight: 1.7, fontFamily: "'JetBrains Mono', monospace" }}>
-                    "Sua solicitação e Link foram registrados no nosso banco Ciber-Minimalista. Identificamos grande potencial de automação estrutural para o seu negócio e mandamos um WhatsApp VIP para nossa equipe!"
+                    "Sua solicitação foi registrada. Identificamos grande potencial para o seu negócio — nossa equipe entrará em contato em breve!"
                   </p>
                   <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed rgba(0,255,65,0.2)', color: 'var(--text-3)', fontSize: '0.75rem', fontFamily: "'JetBrains Mono', monospace" }}>
-                    &gt; Gravando Tabela Supabase... [OK]<br/>
-                    &gt; Trigger Webhook WhatsApp... [OK]<br/>
-                    &gt; Você o receberá no seu aparelho em instantes.
+                    &gt; Gravando Supabase... [OK]<br/>
+                    &gt; E-mail para atendimento... [OK]<br/>
+                    &gt; Notificação WhatsApp... [OK]
                   </div>
                 </div>
               </div>
@@ -631,7 +643,26 @@ export default function Home() {
                   className="form-input"
                   placeholder="ex: zacda.com.br ou @zacda.digital"
                   required
+                  onChange={(e) => setLinkValue(e.target.value.trim())}
                 />
+                {linkValue && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    marginTop: '8px',
+                    padding: '6px 12px',
+                    background: 'rgba(0,229,255,0.06)',
+                    border: '1px solid rgba(0,229,255,0.2)',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    color: '#00e5ff',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}>
+                    <span style={{ animation: 'pulse 1.5s infinite', display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#00e5ff', flexShrink: 0 }}></span>
+                    Sob análise · IA ZACDA irá inspecionar este link
+                  </div>
+                )}
               </div>
 
               <div className="form-group">

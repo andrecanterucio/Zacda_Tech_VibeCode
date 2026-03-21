@@ -3,18 +3,14 @@
 import { createAdminClient } from '@/utils/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
-// Envia mensagem via Evolution API (timeout 8s para não estourar o limite do Vercel)
+// ── Envia mensagem via Evolution API ──────────────────────────────────────
 async function notifyWpp(number: string, text: string): Promise<boolean> {
-  const evoUrl = process.env.EVOLUTION_API_URL
+  const evoUrl   = process.env.EVOLUTION_API_URL
   const evoToken = process.env.EVOLUTION_API_KEY
-  if (!evoUrl || !evoToken || !number) {
-    console.warn('[WhatsApp] Credenciais da Evolution API ausentes. Verifique as env vars no Vercel.')
-    return false
-  }
+  if (!evoUrl || !evoToken || !number) return false
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 8000)
-
   try {
     const res = await fetch(`${evoUrl}/message/sendText/Zacda`, {
       method: 'POST',
@@ -23,111 +19,197 @@ async function notifyWpp(number: string, text: string): Promise<boolean> {
       signal: controller.signal,
     })
     clearTimeout(timeout)
-    if (!res.ok) {
-      const body = await res.text().catch(() => '')
-      console.error(`[WhatsApp] Evolution API retornou ${res.status}:`, body)
-    }
+    if (!res.ok) console.error(`[WhatsApp] Evolution API retornou ${res.status}`)
     return res.ok
   } catch (e: unknown) {
     clearTimeout(timeout)
-    if (e instanceof Error && e.name === 'AbortError') {
-      console.error('[WhatsApp] Timeout ao conectar na Evolution API.')
-    } else {
-      console.error('[WhatsApp] Erro de rede:', e)
-    }
+    console.error('[WhatsApp] Erro:', e instanceof Error ? e.message : e)
     return false
   }
 }
 
-export async function submitLead(formData: FormData) {
-  const name        = formData.get('entityName')?.toString().trim() || ''
-  const email       = formData.get('email')?.toString().trim() || ''
-  const phone       = formData.get('phone')?.toString().trim() || ''
-  const segment     = formData.get('segment')?.toString().trim() || ''
-  const digitalLink = formData.get('digital-link')?.toString().trim() || ''
-  const vision      = formData.get('vision')?.toString().trim() || ''
-
-  if (!name || !email) {
-    return { error: 'O nome e e-mail são obrigatórios.' }
+// ── Envia e-mail via Resend ────────────────────────────────────────────────
+async function sendEmail(opts: {
+  name: string
+  email: string
+  phone: string
+  segment: string
+  digitalLink: string
+  vision: string
+  dbOk: boolean
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.warn('[Email] RESEND_API_KEY não configurado — e-mail não enviado.')
+    return
   }
+
+  const { name, email, phone, segment, digitalLink, vision, dbOk } = opts
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#00e5ff11,#ff1ecd11);padding:32px 40px;border-bottom:1px solid #222;">
+            <p style="margin:0;font-size:22px;font-weight:700;color:#00e5ff;letter-spacing:2px;">ZACDA</p>
+            <p style="margin:4px 0 0;font-size:13px;color:#666;letter-spacing:1px;">DIGITAL AGENCY</p>
+          </td>
+        </tr>
+
+        <!-- Título -->
+        <tr>
+          <td style="padding:32px 40px 0;">
+            <p style="margin:0;font-size:18px;font-weight:600;color:#fff;">🔥 Novo Lead Recebido</p>
+            <p style="margin:8px 0 0;font-size:13px;color:#666;">Formulário de Proposta Estratégica</p>
+          </td>
+        </tr>
+
+        <!-- Dados do Lead -->
+        <tr>
+          <td style="padding:24px 40px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:8px;overflow:hidden;">
+              <tr style="border-bottom:1px solid #1e1e1e;">
+                <td style="padding:14px 20px;font-size:12px;color:#666;width:140px;font-weight:600;letter-spacing:0.5px;">NOME</td>
+                <td style="padding:14px 20px;font-size:14px;color:#fff;">${name}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #1e1e1e;">
+                <td style="padding:14px 20px;font-size:12px;color:#666;font-weight:600;letter-spacing:0.5px;">E-MAIL</td>
+                <td style="padding:14px 20px;font-size:14px;color:#00e5ff;">
+                  <a href="mailto:${email}" style="color:#00e5ff;text-decoration:none;">${email}</a>
+                </td>
+              </tr>
+              <tr style="border-bottom:1px solid #1e1e1e;">
+                <td style="padding:14px 20px;font-size:12px;color:#666;font-weight:600;letter-spacing:0.5px;">TELEFONE</td>
+                <td style="padding:14px 20px;font-size:14px;color:#fff;">${phone || 'Não informado'}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #1e1e1e;">
+                <td style="padding:14px 20px;font-size:12px;color:#666;font-weight:600;letter-spacing:0.5px;">SEGMENTO</td>
+                <td style="padding:14px 20px;font-size:14px;color:#fff;">${segment}</td>
+              </tr>
+              ${digitalLink ? `
+              <tr style="border-bottom:1px solid #1e1e1e;">
+                <td style="padding:14px 20px;font-size:12px;color:#666;font-weight:600;letter-spacing:0.5px;">LINK DIGITAL</td>
+                <td style="padding:14px 20px;font-size:14px;color:#00e5ff;">
+                  <a href="${digitalLink.startsWith('http') ? digitalLink : 'https://' + digitalLink}" target="_blank" style="color:#00e5ff;text-decoration:none;">${digitalLink}</a>
+                </td>
+              </tr>` : ''}
+              <tr>
+                <td style="padding:14px 20px;font-size:12px;color:#666;font-weight:600;letter-spacing:0.5px;vertical-align:top;">OBJETIVO</td>
+                <td style="padding:14px 20px;font-size:14px;color:#ccc;line-height:1.6;">${vision}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Status DB -->
+        <tr>
+          <td style="padding:0 40px 24px;">
+            <p style="margin:0;font-size:12px;color:${dbOk ? '#00e5ff' : '#ff4444'};">
+              ${dbOk ? '✅ Lead salvo no Supabase' : '⚠️ Falha ao salvar no Supabase — verificar logs'}
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 40px;background:#0d0d0d;border-top:1px solid #1e1e1e;">
+            <p style="margin:0;font-size:11px;color:#444;text-align:center;">
+              ZACDA Digital Agency · atendimento@zacda.com.br · Este e-mail foi gerado automaticamente.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'ZACDA Site <onboarding@resend.dev>',
+        to:   ['atendimento@zacda.com.br'],
+        reply_to: email,
+        subject: `[ZACDA] Novo Lead — ${name} | ${segment}`,
+        html,
+      }),
+    })
+
+    const data = await res.json().catch(() => ({}))
+    if (res.ok) {
+      console.log('[Email] Enviado com sucesso via Resend. ID:', (data as { id?: string }).id)
+    } else {
+      console.error('[Email] Resend retornou erro:', res.status, JSON.stringify(data))
+    }
+  } catch (e) {
+    console.error('[Email] Falha na requisição Resend:', e)
+  }
+}
+
+// ── Server Action principal ────────────────────────────────────────────────
+export async function submitLead(formData: FormData) {
+  const name        = formData.get('entityName')?.toString().trim()  || ''
+  const email       = formData.get('email')?.toString().trim()       || ''
+  const phone       = formData.get('phone')?.toString().trim()       || ''
+  const segment     = formData.get('segment')?.toString().trim()     || ''
+  const digitalLink = formData.get('digital-link')?.toString().trim() || ''
+  const vision      = formData.get('vision')?.toString().trim()      || ''
+
+  if (!name || !email) return { error: 'O nome e e-mail são obrigatórios.' }
 
   const fullMessage = [
     `Telefone: ${phone || 'Não informado'}`,
     `Segmento: ${segment}`,
-    `Link: ${digitalLink}`,
+    `Link: ${digitalLink || 'Não informado'}`,
     `\nVisão: ${vision}`,
   ].join('\n')
 
-  // 1. Salva no Banco de Dados (Supabase — admin client bypasses RLS)
+  // 1. Salva no Supabase (admin client — bypassa RLS)
   let dbOk = false
   try {
     const supabase = createAdminClient()
-    const { error: dbError } = await supabase.from('leads').insert([{
-      name, email, message: fullMessage
-    }])
-    if (dbError) {
-      console.error('[Supabase] Erro ao inserir lead:', dbError.message, dbError.code)
-    } else {
-      dbOk = true
-      console.log('[Supabase] Lead salvo com sucesso:', email)
-    }
+    const { error: dbError } = await supabase.from('leads').insert([{ name, email, message: fullMessage }])
+    if (dbError) console.error('[Supabase] Erro:', dbError.message, dbError.code)
+    else { dbOk = true; console.log('[Supabase] Lead salvo:', email) }
   } catch (e) {
     console.error('[Supabase] Exceção:', e)
   }
 
-  // 2. Envia e-mail para atendimento@zacda.com.br via Web3Forms (JSON body)
-  try {
-    const emailPayload = {
-      access_key: 'c08a4935-8981-45dd-bfc3-ddadd18d016d',
-      subject: `[ZACDA] Novo Lead — ${name} | ${segment}`,
-      from_name: 'ZACDA Site',
-      replyto: email,
-      redirect: 'false',
-      Nome: name,
-      'E-mail': email,
-      Telefone: phone || 'Não informado',
-      Segmento: segment,
-      'Link Digital': digitalLink || 'Não informado',
-      'Visao e Objetivo': vision,
-    }
-    const emailRes = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(emailPayload),
-    })
-    const emailData = await emailRes.json().catch(() => ({}))
-    if (emailRes.ok && emailData.success) {
-      console.log('[Email] Enviado com sucesso via Web3Forms:', emailData.message)
-    } else {
-      console.error('[Email] Web3Forms retornou erro:', emailRes.status, JSON.stringify(emailData))
-    }
-  } catch (e) {
-    console.error('[Email] Falha ao enviar:', e)
-  }
+  // 2. E-mail para atendimento@zacda.com.br via Resend
+  await sendEmail({ name, email, phone, segment, digitalLink, vision, dbOk })
 
-  // 3. Limpa telefone para formato WhatsApp internacional
+  // 3. Limpa telefone para formato internacional
   let cleanPhone = phone.replace(/\D/g, '')
-  if (cleanPhone.length > 8 && !cleanPhone.startsWith('55')) {
-    cleanPhone = '55' + cleanPhone
-  }
+  if (cleanPhone.length > 8 && !cleanPhone.startsWith('55')) cleanPhone = '55' + cleanPhone
 
-  // 4. WhatsApp de retorno ao cliente (se tiver telefone)
+  // 4. WhatsApp de confirmação ao cliente
   if (cleanPhone) {
     await notifyWpp(
       cleanPhone,
-      `Olá ${name}! ✅ Recebemos sua requisição na ZACDA Tech.\n\nNossa IA já iniciou a triagem no setor de *${segment}* e nossa equipe entrará em contato em breve para discutir sua arquitetura digital! 🦾\n\n_— ZACDA Digital Agency_`
+      `Olá ${name}! ✅ Recebemos sua requisição na ZACDA Tech.\n\nNossa IA já iniciou a triagem no setor de *${segment}*${digitalLink ? ` e está analisando seu link *${digitalLink}*` : ''}.\n\nNossa equipe entrará em contato em breve! 🦾\n\n_— ZACDA Digital Agency_`
     )
   }
 
-  // 5. Alerta ao admin (número fixo)
+  // 5. Alerta ao admin via WhatsApp
   await notifyWpp(
     '5516993193919',
-    `🔥 *NOVO LEAD ZACDA!*\n\n👤 *Nome:* ${name}\n📧 *Email:* ${email}\n📱 *Telefone:* ${phone || 'Não informado'}\n🏢 *Segmento:* ${segment}\n🔗 *Link:* ${digitalLink || 'Não informado'}\n\n💬 *Objetivo:*\n"${vision}"\n\n_DB salvo: ${dbOk ? '✅' : '❌ FALHOU'}_`
+    `🔥 *NOVO LEAD ZACDA!*\n\n👤 *Nome:* ${name}\n📧 *Email:* ${email}\n📱 *Telefone:* ${phone || 'Não informado'}\n🏢 *Segmento:* ${segment}\n🔗 *Link:* ${digitalLink || 'Não informado'}\n\n💬 *Objetivo:*\n"${vision}"\n\n_DB: ${dbOk ? '✅' : '❌ FALHOU'}_`
   )
 
   revalidatePath('/')
-  return { success: true }
+  // Retorna o link para exibição condicional na tela de sucesso
+  return { success: true, digitalLink }
 }
