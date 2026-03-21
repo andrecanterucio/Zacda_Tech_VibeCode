@@ -8,6 +8,28 @@ import React, { useState } from 'react';
 export default function Home() {
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [leadData, setLeadData] = useState({ name: '', segment: '' });
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  async function handleSelectPlan(plan: 'start' | 'grow' | 'pro') {
+    setCheckoutLoading(plan);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error ?? 'Erro ao iniciar pagamento. Tente novamente.');
+        setCheckoutLoading(null);
+      }
+    } catch {
+      alert('Erro de conexão. Verifique sua internet e tente novamente.');
+      setCheckoutLoading(null);
+    }
+  }
 
   async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -326,7 +348,14 @@ export default function Home() {
               <li><strong style={{color: 'var(--text-1)'}}>Gestão:</strong> E-mail corporativo</li>
               <li><strong style={{color: 'var(--text-1)'}}>Infra:</strong> Hospedagem Vercel (EUA)</li>
             </ul>
-            <a href="#proposta" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>Selecionar START</a>
+            <button
+              onClick={() => handleSelectPlan('start')}
+              disabled={checkoutLoading !== null}
+              className="btn btn-secondary"
+              style={{ width: '100%', justifyContent: 'center', cursor: checkoutLoading ? 'wait' : 'pointer' }}
+            >
+              {checkoutLoading === 'start' ? 'Redirecionando...' : 'Selecionar START →'}
+            </button>
           </div>
 
           <div className="glass-card pricing-card featured-plan">
@@ -342,7 +371,14 @@ export default function Home() {
               <li><strong style={{color: 'var(--text-1)'}}>Gestão:</strong> Banco de Dados Supabase</li>
               <li><strong style={{color: 'var(--text-1)'}}>Infra:</strong> Manutenção Vibe Code</li>
             </ul>
-            <a href="#proposta" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>Selecionar GROW</a>
+            <button
+              onClick={() => handleSelectPlan('grow')}
+              disabled={checkoutLoading !== null}
+              className="btn btn-primary"
+              style={{ width: '100%', justifyContent: 'center', cursor: checkoutLoading ? 'wait' : 'pointer' }}
+            >
+              {checkoutLoading === 'grow' ? 'Redirecionando...' : 'Selecionar GROW →'}
+            </button>
           </div>
 
           <div className="glass-card pricing-card">
@@ -357,7 +393,14 @@ export default function Home() {
               <li><strong style={{color: 'var(--text-1)'}}>Gestão:</strong> CRM Backend Integrado</li>
               <li><strong style={{color: 'var(--text-1)'}}>Infra:</strong> Hospedagem e Suporte VIP</li>
             </ul>
-            <a href="#proposta" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>Selecionar PRO</a>
+            <button
+              onClick={() => handleSelectPlan('pro')}
+              disabled={checkoutLoading !== null}
+              className="btn btn-secondary"
+              style={{ width: '100%', justifyContent: 'center', cursor: checkoutLoading ? 'wait' : 'pointer' }}
+            >
+              {checkoutLoading === 'pro' ? 'Redirecionando...' : 'Selecionar PRO →'}
+            </button>
           </div>
 
         </div>
