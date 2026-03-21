@@ -45,8 +45,8 @@ export async function POST(req: Request) {
     const payload = await req.json();
 
     // Filtra para responder apenas a criação de novas mensagens (upsert)
-    const event = payload?.event;
-    if (event !== 'messages.upsert') {
+    const event = payload?.event?.toLowerCase();
+    if (event !== 'messages.upsert' && event !== 'messages.update') {
       return NextResponse.json({ ignored: true, reason: 'unsupported_event' });
     }
 

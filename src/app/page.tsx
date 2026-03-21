@@ -3,8 +3,30 @@ import Image from 'next/image';
 import { submitLead } from './actions';
 import Link from 'next/link';
 import Script from 'next/script';
+import React, { useState } from 'react';
 
 export default function Home() {
+  const [formState, setFormState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [leadData, setLeadData] = useState({ name: '', segment: '' });
+
+  async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setFormState('loading');
+    const formData = new FormData(e.currentTarget);
+    const segSelect = e.currentTarget.elements.namedItem('segment') as HTMLSelectElement;
+    setLeadData({
+      name: formData.get('entityName')?.toString() || '',
+      segment: segSelect?.options[segSelect.selectedIndex]?.text || ''
+    });
+
+    try {
+      const res = await submitLead(formData);
+      if (res?.success) setFormState('success');
+      else setFormState('error');
+    } catch {
+      setFormState('error');
+    }
+  }
   return (
     <main>
       
@@ -34,6 +56,7 @@ export default function Home() {
       <ul className="nav-links">
         <li><a href="#padrao">Padrão</a></li>
         <li><a href="#servicos">Serviços</a></li>
+        <li><a href="#planos">Planos</a></li>
         <li><a href="#capabilities">Capacidades</a></li>
         <li><a href="#proposta">Contato</a></li>
       </ul>
@@ -260,6 +283,76 @@ export default function Home() {
       </div>
     </section>
 
+    {/*  ═══ PREÇOS & ESTRATÉGIA DE VENDAS ═══  */}
+    <section id="planos" aria-labelledby="planos-heading" style={{ position: 'relative', zIndex: 1, padding: '8rem 0' }}>
+      <div className="container">
+        <header className="services-header" style={{ marginBottom: '2rem' }}>
+          <div className="section-tag" style={{ borderColor: 'var(--magenta)', color: 'var(--text-1)' }}>Investimento & ROI</div>
+          <h2 id="planos-heading" className="services-title reveal">
+            Planos Estratégicos<br />
+            <span className="gradient-text">ZACDA Tech</span>
+          </h2>
+        </header>
+
+        <div className="reveal reveal-delay-2" style={{ maxWidth: '800px', margin: '0 auto 4rem', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--border)', color: 'var(--text-2)', lineHeight: 1.7 }}>
+          <h3 style={{ color: 'var(--cyan)', marginBottom: '1rem', fontSize: '1.2rem' }}>Estratégias de Venda B2B</h3>
+          <p style={{ marginBottom: '1rem' }}><strong style={{ color: 'var(--text-1)' }}>1. O Pacote "Tudo em Um" (O Kit)</strong><br/>Nós não entregamos apenas "sites". Instalamos o Kit Empresa Digital: Site profissional, e-mail corporativo, QR Code físico para o balcão e seu Agente Oficial de WhatsApp. <br/><em style={{ color: 'var(--cyan)' }}>"Por menos do que o custo de um café por dia, sua agência fica aberta 24h na internet gerando negócios."</em></p>
+          <p style={{ marginBottom: '1rem' }}><strong style={{ color: 'var(--text-1)' }}>2. Setup Reduzido</strong><br/>Amortizamos o alto custo de desenvolvimento com um setup simbólico de R$ 497, operando num formato de assinatura anual de inteligência artificial.</p>
+          <p><strong style={{ color: 'var(--text-1)' }}>3. Prova de Valor Imediata</strong><br/>Envie-nos uma proposta no formulário abaixo ou nos chame no botão de WhatsApp e veja o Agente Neural do Claude triando seus dados em tempo real!</p>
+        </div>
+
+        <div className="pricing-grid reveal reveal-delay-3">
+          
+          <div className="glass-card pricing-card">
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Plano START</h3>
+            <p style={{ color: 'var(--text-2)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Foco: "Ser Encontrado"</p>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', fontFamily: "'Space Grotesk', sans-serif" }}>R$ 147<span style={{ fontSize: '1rem', color: 'var(--text-3)' }}>/mês</span></div>
+            <p style={{ color: 'var(--cyan)', fontSize: '0.85rem', marginBottom: '2rem', marginTop: '0.5rem' }}>Setup: <del style={{ color: 'var(--text-3)' }}>R$ 900</del> R$ 497</p>
+            
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem', fontSize: '0.9rem', flex: 1 }}>
+              <li><strong style={{color: 'var(--text-1)'}}>Site:</strong> Landing Page Express</li>
+              <li><strong style={{color: 'var(--text-1)'}}>WhatsApp:</strong> Botão de Contato</li>
+              <li><strong style={{color: 'var(--text-1)'}}>Gestão:</strong> E-mail corporativo</li>
+              <li><strong style={{color: 'var(--text-1)'}}>Infra:</strong> Hospedagem Vercel (EUA)</li>
+            </ul>
+            <a href="#proposta" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>Selecionar START</a>
+          </div>
+
+          <div className="glass-card pricing-card featured-plan">
+            <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)', background: 'var(--cyan)', color: 'var(--bg)', padding: '0.4rem 1.2rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>⭐ Melhor Plano</div>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--cyan)' }}>Plano GROW</h3>
+            <p style={{ color: 'var(--text-2)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Foco: "Gerar Orçamentos"</p>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', fontFamily: "'Space Grotesk', sans-serif" }}>R$ 297<span style={{ fontSize: '1rem', color: 'var(--text-3)' }}>/mês</span></div>
+            <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', marginBottom: '2rem', marginTop: '0.5rem' }}>Setup: R$ 1.200</p>
+            
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem', fontSize: '0.9rem', flex: 1 }}>
+              <li><strong style={{color: 'var(--text-1)'}}>Site:</strong> Site Institucional + Blog SEO</li>
+              <li><strong style={{color: 'var(--text-1)'}}>WhatsApp:</strong> Agente IA (Triagem Online)</li>
+              <li><strong style={{color: 'var(--text-1)'}}>Gestão:</strong> Banco de Dados Supabase</li>
+              <li><strong style={{color: 'var(--text-1)'}}>Infra:</strong> Manutenção Vibe Code</li>
+            </ul>
+            <a href="#proposta" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>Selecionar GROW</a>
+          </div>
+
+          <div className="glass-card pricing-card">
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--magenta)' }}>Plano PRO</h3>
+            <p style={{ color: 'var(--text-2)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Foco: "Escalar sem Limites"</p>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', fontFamily: "'Space Grotesk', sans-serif" }}>R$ 497<span style={{ fontSize: '1rem', color: 'var(--text-3)' }}>/mês</span></div>
+            <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', marginBottom: '2rem', marginTop: '0.5rem' }}>Setup: R$ 2.500</p>
+            
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem', fontSize: '0.9rem', flex: 1 }}>
+              <li><strong style={{color: 'var(--text-1)'}}>Site:</strong> Web App + Área de Membros</li>
+              <li><strong style={{color: 'var(--text-1)'}}>WhatsApp:</strong> Agente IA (Venda e Agenda)</li>
+              <li><strong style={{color: 'var(--text-1)'}}>Gestão:</strong> CRM Backend Integrado</li>
+              <li><strong style={{color: 'var(--text-1)'}}>Infra:</strong> Hospedagem e Suporte VIP</li>
+            </ul>
+            <a href="#proposta" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>Selecionar PRO</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     {/*  ═══ OPERAÇÕES INTELIGENTES (Micro SaaS & IA) ═══  */}
     <section id="automations" aria-labelledby="automations-heading">
       <div className="container">
@@ -370,7 +463,25 @@ export default function Home() {
           </div>
 
           <div>
-            <form action={async (formData) => { await submitLead(formData); alert('Pronto! Recebemos a sua mensagem, entraremos em contato via WhatsApp em breve.'); }} className="glass-card proposta-form reveal reveal-delay-2" id="proposal-form" noValidate>
+            {formState === 'success' ? (
+              <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 2rem', animation: 'fade-in 0.8s ease' }}>
+                <h3 style={{ color: '#00ff41', fontFamily: "'Space Grotesk', sans-serif", marginBottom: '1.5rem', fontSize: '1.5rem' }}>Análise IA Concluída ✓</h3>
+                <div style={{ textAlign: 'left', background: 'rgba(0,255,65,0.05)', border: '1px solid rgba(0,255,65,0.2)', borderRadius: '12px', padding: '1.5rem' }}>
+                  <p style={{ color: 'var(--text-1)', fontSize: '0.9rem', marginBottom: '1rem', fontFamily: "'JetBrains Mono', monospace" }}>
+                    &gt; 🧠 Agente IA: Olá, <strong style={{ color: '#00ff41' }}>{leadData.name}</strong>! Triamos sua requisição para o setor de <strong style={{ color: '#00e5ff' }}>{leadData.segment}</strong>.
+                  </p>
+                  <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', lineHeight: 1.7, fontFamily: "'JetBrains Mono', monospace" }}>
+                    "Sua solicitação e Link foram registrados no nosso banco Ciber-Minimalista. Identificamos grande potencial de automação estrutural para o seu negócio e mandamos um WhatsApp VIP para nossa equipe!"
+                  </p>
+                  <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed rgba(0,255,65,0.2)', color: 'var(--text-3)', fontSize: '0.75rem', fontFamily: "'JetBrains Mono', monospace" }}>
+                    &gt; Gravando Tabela Supabase... [OK]<br/>
+                    &gt; Trigger Webhook WhatsApp... [OK]<br/>
+                    &gt; Você o receberá no seu aparelho em instantes.
+                  </div>
+                </div>
+              </div>
+            ) : (
+            <form onSubmit={handleFormSubmit} className="glass-card proposta-form reveal reveal-delay-2" id="proposal-form" noValidate>
 
               <h3 className="form-heading">Iniciar Proposta Estratégica</h3>
               <p className="form-subheading">Entrada de propostas estratégicas</p>
@@ -486,12 +597,15 @@ export default function Home() {
                 className="form-submit"
                 id="form-submit-btn"
                 aria-label="Enviar proposta estratégica"
+                disabled={formState === 'loading'}
+                style={{ background: formState === 'loading' ? 'transparent' : '', borderColor: formState === 'loading' ? 'var(--cyan)' : '' }}
               >
-                Enviar Proposta →
+                {formState === 'loading' ? 'IA Extraindo Dados... ⏳' : 'Enviar Proposta →'}
               </button>
 
               <p className="form-protocol">Protocolo proprietário • ZACDA Digital 2024</p>
             </form>
+            )}
           </div>
         </div>
       </div>

@@ -3861,3 +3861,5 @@ body {
       .auto-wrap { grid-template-columns: 1fr; }
     }
   
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 3rem; } .pricing-card { padding: 3rem 2rem; position: relative; display: flex; flex-direction: column; } .pricing-card.featured-plan { border: 1px solid var(--cyan); background: rgba(0, 229, 255, 0.03); transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 229, 255, 0.15); } @media (max-width: 900px) { .pricing-grid { grid-template-columns: 1fr; } .pricing-card.featured-plan { transform: scale(1); } } .flow-nodes { align-items: center; } .flow-node { width: 100%; max-width: 380px; justify-content: flex-start; }
+
