@@ -51,14 +51,16 @@ export async function POST(req: Request) {
     }
 
     const messageData = payload?.data?.message;
+    const keyData = payload?.data?.key || payload?.data;
+    
     // Ignorar mensagens geradas pelo próprio Agente ou bots internos
-    if (!messageData || messageData.fromMe) {
+    if (!messageData || keyData?.fromMe) {
       return NextResponse.json({ ignored: true, reason: 'from_me' });
     }
 
-    const remoteJid = payload?.data?.key?.remoteJid || messageData.key?.remoteJid;
+    const remoteJid = keyData?.remoteJid;
     // Pega mensagens simples e textos extensos (que chegam de links ou etc)
-    const userMessage = messageData?.message?.conversation || messageData?.message?.extendedTextMessage?.text;
+    const userMessage = messageData?.conversation || messageData?.extendedTextMessage?.text || payload?.data?.textMessage?.text;
 
     // Ignora mídias não textuais ou status do grupo inicialmente
     if (!userMessage || !remoteJid) {

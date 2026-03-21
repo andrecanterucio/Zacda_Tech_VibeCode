@@ -337,7 +337,7 @@ export default function Home() {
             <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', marginBottom: '2rem', marginTop: '0.5rem' }}>Setup: R$ 1.200</p>
             
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem', fontSize: '0.9rem', flex: 1 }}>
-              <li><strong style={{color: 'var(--text-1)'}}>Site:</strong> Site Institucional + Blog SEO</li>
+              <li><strong style={{color: 'var(--text-1)'}}>Site:</strong> Site Institucional + SEO</li>
               <li><strong style={{color: 'var(--text-1)'}}>WhatsApp:</strong> Agente IA (Triagem Online)</li>
               <li><strong style={{color: 'var(--text-1)'}}>Gestão:</strong> Banco de Dados Supabase</li>
               <li><strong style={{color: 'var(--text-1)'}}>Infra:</strong> Manutenção Vibe Code</li>
@@ -348,8 +348,8 @@ export default function Home() {
           <div className="glass-card pricing-card">
             <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--magenta)' }}>Plano PRO</h3>
             <p style={{ color: 'var(--text-2)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Foco: "Escalar sem Limites"</p>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', fontFamily: "'Space Grotesk', sans-serif" }}>R$ 497<span style={{ fontSize: '1rem', color: 'var(--text-3)' }}>/mês</span></div>
-            <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', marginBottom: '2rem', marginTop: '0.5rem' }}>Setup: R$ 2.500</p>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', fontFamily: "'Space Grotesk', sans-serif" }}>R$ 1.199<span style={{ fontSize: '1rem', color: 'var(--text-3)' }}>/mês</span></div>
+            <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', marginBottom: '2rem', marginTop: '0.5rem' }}>Setup: R$ 6.500</p>
             
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem', fontSize: '0.9rem', flex: 1 }}>
               <li><strong style={{color: 'var(--text-1)'}}>Site:</strong> Web App + Área de Membros</li>
