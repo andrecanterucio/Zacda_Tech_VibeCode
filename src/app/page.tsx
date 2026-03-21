@@ -391,7 +391,7 @@ export default function Home() {
             </div>
             <div className="widget-body">
               <p className="widget-instru">Clique no botão abaixo para simular a entrada de um novo lead no seu funil autônomo:</p>
-              <button id="simulate-lead-btn" className="btn btn-primary" style={{}} /* TODO: convert inline styles */>Simular Entrada de Lead</button>
+              <button id="simulate-lead-btn" className="btn btn-primary" style={{ display: 'flex', margin: '0 auto 2rem auto', justifyContent: 'center' }}>Simular Entrada de Lead</button>
               
               <div className="flow-nodes">
                 <div className="flow-node" id="node-1">
