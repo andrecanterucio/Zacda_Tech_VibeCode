@@ -295,10 +295,21 @@ export default function Home() {
         </header>
 
         <div className="reveal reveal-delay-2" style={{ maxWidth: '800px', margin: '0 auto 4rem', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--border)', color: 'var(--text-2)', lineHeight: 1.7 }}>
-          <h3 style={{ color: 'var(--cyan)', marginBottom: '1rem', fontSize: '1.2rem' }}>Estratégias de Venda B2B</h3>
-          <p style={{ marginBottom: '1rem' }}><strong style={{ color: 'var(--text-1)' }}>1. O Pacote "Tudo em Um" (O Kit)</strong><br/>Nós não entregamos apenas "sites". Instalamos o Kit Empresa Digital: Site profissional, e-mail corporativo, QR Code físico para o balcão e seu Agente Oficial de WhatsApp. <br/><em style={{ color: 'var(--cyan)' }}>"Por menos do que o custo de um café por dia, sua agência fica aberta 24h na internet gerando negócios."</em></p>
-          <p style={{ marginBottom: '1rem' }}><strong style={{ color: 'var(--text-1)' }}>2. Setup Reduzido</strong><br/>Amortizamos o alto custo de desenvolvimento com um setup simbólico de R$ 497, operando num formato de assinatura anual de inteligência artificial.</p>
-          <p><strong style={{ color: 'var(--text-1)' }}>3. Prova de Valor Imediata</strong><br/>Envie-nos uma proposta no formulário abaixo ou nos chame no botão de WhatsApp e veja o Agente Neural do Claude triando seus dados em tempo real!</p>
+          <h3 style={{ color: 'var(--cyan)', marginBottom: '1.5rem', fontSize: '1.4rem', textAlign: 'center' }}>Transforme sua empresa em uma máquina de atrair clientes 24h por dia</h3>
+          
+          <h4 style={{ color: 'var(--text-1)', marginBottom: '0.8rem', fontSize: '1.05rem' }}>Pacote “Tudo em Um” – O Kit Empresa Digital Completo</h4>
+          <p style={{ marginBottom: '1.2rem' }}>Deixamos de entregar “apenas um site”. Entregamos o Kit Empresa Digital pronto para faturar:</p>
+          
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '2rem', paddingLeft: '0.5rem' }}>
+            <li><span style={{ color: 'var(--cyan)', marginRight: '8px', fontWeight: 'bold' }}>✓</span> <strong style={{ color: 'var(--text-1)' }}>Site profissional</strong> otimizado para conversão + SEO inicial</li>
+            <li><span style={{ color: 'var(--cyan)', marginRight: '8px', fontWeight: 'bold' }}>✓</span> <strong style={{ color: 'var(--text-1)' }}>E-mail corporativo</strong> profissional (@suaempresa.com.br)</li>
+            <li><span style={{ color: 'var(--cyan)', marginRight: '8px', fontWeight: 'bold' }}>✓</span> <strong style={{ color: 'var(--text-1)' }}>Agente Oficial de WhatsApp</strong> com Inteligência Artificial (responde 24h, qualifica leads, agenda atendimentos e envia orçamentos automáticos)</li>
+          </ul>
+
+          <h4 style={{ color: 'var(--text-1)', marginBottom: '0.8rem', fontSize: '1.05rem' }}>Resultado real para o cliente:</h4>
+          <blockquote style={{ borderLeft: '3px solid var(--magenta)', paddingLeft: '1.5rem', fontStyle: 'italic', color: 'var(--text-1)', background: 'linear-gradient(90deg, rgba(255,30,205,0.1) 0%, transparent 100%)', padding: '1.5rem', borderRadius: '0 8px 8px 0' }}>
+            “Por menos do que um café por dia (menos de R$ 10/dia), sua empresa fica aberta 24 horas na internet gerando contatos e fechando negócios enquanto você dorme, viaja ou atende outros clientes.”
+          </blockquote>
         </div>
 
         <div className="pricing-grid reveal reveal-delay-3">
