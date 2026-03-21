@@ -807,10 +807,10 @@ export default function Home() {
         <div>
           <h3 className="footer-col-title">Jurídico</h3>
           <ul className="footer-links">
-            <li><a href="privacidade.html">Privacidade</a></li>
-            <li><a href="termos.html">Termos</a></li>
-            <li><a href="cookies.html">Cookies</a></li>
-            <li><a href="nda.html">NDA</a></li>
+            <li><a href="/privacidade">Privacidade</a></li>
+            <li><a href="/termos">Termos</a></li>
+            <li><a href="/cookies">Cookies</a></li>
+            <li><a href="/nda">NDA</a></li>
           </ul>
         </div>
       </div>
