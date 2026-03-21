@@ -6,29 +6,28 @@ const PLANS = {
   start: {
     name: 'Plano START',
     description: 'Landing Page Express + E-mail corporativo + WhatsApp',
-    monthlyAmount: 14700,  // R$ 147,00 (em centavos)
-    setupAmount:   49700,  // R$ 497,00
-    setupLabel:    'Taxa de Setup — Plano START',
+    setupAmount: 49700,   // R$ 497,00 (em centavos)
+    setupLabel:  'Setup/Implementação — Plano START',
   },
   grow: {
     name: 'Plano GROW',
     description: 'Site Institucional + SEO + Agente IA (Triagem Online)',
-    monthlyAmount:  29700, // R$ 297,00
-    setupAmount:   120000, // R$ 1.200,00
-    setupLabel:    'Taxa de Setup — Plano GROW',
+    setupAmount: 120000,  // R$ 1.200,00
+    setupLabel:  'Setup/Implementação — Plano GROW',
   },
   pro: {
     name: 'Plano PRO',
     description: 'Web App + Área de Membros + CRM + Agente IA Completo',
-    monthlyAmount: 119900, // R$ 1.199,00
-    setupAmount:   650000, // R$ 6.500,00
-    setupLabel:    'Taxa de Setup — Plano PRO',
+    setupAmount: 650000,  // R$ 6.500,00
+    setupLabel:  'Setup/Implementação — Plano PRO',
   },
 } as const
 
 type PlanKey = keyof typeof PLANS
 
-// ── Endpoint POST /api/checkout ────────────────────────────────────────────
+// ── POST /api/checkout ─────────────────────────────────────────────────────
+// Etapa 1: cobra apenas o setup fee e salva o cartão para cobrança futura.
+// Etapa 2: o webhook /api/stripe-webhook cria a subscription após confirmação.
 export async function POST(req: Request) {
   const secretKey = process.env.STRIPE_SECRET_KEY
   if (!secretKey) {
@@ -54,37 +53,30 @@ export async function POST(req: Request) {
   try {
     const stripe = new Stripe(secretKey)
 
-    // Subscription + setup fee como line_item one-time (cobrado só na 1ª fatura)
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+      mode: 'payment',          // Cobrança única (setup fee)
       locale: 'pt-BR',
       line_items: [
         {
-          // Item recorrente — mensalidade
-          price_data: {
-            currency: 'brl',
-            product_data: {
-              name: `${planData.name} — Mensalidade`,
-              description: planData.description,
-            },
-            unit_amount: planData.monthlyAmount,
-            recurring: { interval: 'month' },
-          },
-          quantity: 1,
-        },
-        {
-          // Item avulso — setup (sem 'recurring', cobrado apenas na 1ª fatura)
           price_data: {
             currency: 'brl',
             product_data: {
               name: planData.setupLabel,
-              description: 'Implementação e configuração inicial — cobrado uma única vez',
+              description: `${planData.description} — Taxa única de implementação`,
             },
             unit_amount: planData.setupAmount,
           },
           quantity: 1,
         },
       ],
+      // Salva o cartão para cobranças mensais futuras (sem que o cliente precise redigitar)
+      payment_intent_data: {
+        setup_future_usage: 'off_session',
+        metadata: { plan },
+      },
+      // Cria sempre um Customer do Stripe (necessário para criar subscription depois)
+      customer_creation: 'always',
+      metadata: { plan },
       payment_method_types: ['card'],
       allow_promotion_codes: true,
       success_url: `${baseUrl}/sucesso?plan=${plan}`,
