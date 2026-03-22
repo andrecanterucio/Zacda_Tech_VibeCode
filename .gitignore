@@ -42,3 +42,9 @@ next-env.d.ts
 
 .vercel
 public/assets/video/hero-bg.mp4
+
+# VPS / Deploy artifacts
+/vps-deploy/
+/hostinger-deploy/
+zacda-vps.zip
+hostinger-deploy.zip
