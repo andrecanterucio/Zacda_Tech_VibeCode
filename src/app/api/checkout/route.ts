@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { createAdminClient } from '@/utils/supabase/admin'
 
 // ── Definição dos planos ───────────────────────────────────────────────────
 const PLANS = {
@@ -83,6 +84,20 @@ export async function POST(req: Request) {
       cancel_url:  `${baseUrl}/#planos`,
     })
 
+    // Grava reserva pendente no Supabase (assíncrono — não bloqueia o redirect)
+    void (async () => {
+      try {
+        const { error } = await createAdminClient()
+          .from('reservas')
+          .insert([{ plano: plan, status: 'pendente', stripe_session_id: session.id }])
+        if (error) console.error('[Supabase] Erro ao salvar reserva:', error.message)
+        else        console.log('[Supabase] Reserva criada:', session.id)
+      } catch (e) {
+        console.error('[Supabase] Exceção ao salvar reserva:', e)
+      }
+    })()
+
+    console.log('SISTEMAS ONLINE')
     return NextResponse.json({ url: session.url })
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)

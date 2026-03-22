@@ -28,7 +28,9 @@ function createTransporter() {
 }
 
 // ── WhatsApp via Evolution API ─────────────────────────────────────────────
-async function notifyWpp(number: string, text: string): Promise<boolean> {
+// Delay inteligente: mensagem ao admin chega imediatamente;
+// auto-resposta ao lead chega 3s depois (delayMessage) para parecer humana.
+async function notifyWpp(number: string, text: string, delay = 1000): Promise<boolean> {
   const evoUrl   = process.env.EVOLUTION_API_URL
   const evoToken = process.env.EVOLUTION_API_KEY
   if (!evoUrl || !evoToken || !number) return false
@@ -39,7 +41,7 @@ async function notifyWpp(number: string, text: string): Promise<boolean> {
     const res = await fetch(`${evoUrl}/message/sendText/Zacda`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: evoToken },
-      body: JSON.stringify({ number, text, delayMessage: 1000 }),
+      body: JSON.stringify({ number, text, delayMessage: delay }),
       signal: controller.signal,
     })
     clearTimeout(timeout)
@@ -52,7 +54,7 @@ async function notifyWpp(number: string, text: string): Promise<boolean> {
   }
 }
 
-// ── E-mail via Zoho SMTP ───────────────────────────────────────────────────
+// ── E-mail de alerta via Zoho SMTP ────────────────────────────────────────
 async function sendEmail(lead: LeadPayload, dbOk: boolean): Promise<void> {
   if (!process.env.ZOHO_EMAIL || !process.env.ZOHO_APP_PASSWORD) {
     console.warn('[Email] ZOHO_EMAIL ou ZOHO_APP_PASSWORD não configurados.')
@@ -73,14 +75,14 @@ async function sendEmail(lead: LeadPayload, dbOk: boolean): Promise<void> {
         <tr>
           <td style="background:linear-gradient(135deg,#00e5ff11,#ff1ecd11);padding:32px 40px;border-bottom:1px solid #222;">
             <p style="margin:0;font-size:22px;font-weight:700;color:#00e5ff;letter-spacing:2px;">ZACDA</p>
-            <p style="margin:4px 0 0;font-size:13px;color:#666;letter-spacing:1px;">DIGITAL AGENCY · NOVO LEAD</p>
+            <p style="margin:4px 0 0;font-size:13px;color:#666;letter-spacing:1px;">DIGITAL AGENCY · NOVA PROPOSTA</p>
           </td>
         </tr>
 
         <tr>
           <td style="padding:32px 40px 0;">
-            <p style="margin:0;font-size:18px;font-weight:600;color:#fff;">🔥 Novo Lead Recebido</p>
-            <p style="margin:8px 0 0;font-size:13px;color:#666;">Formulário de Proposta Estratégica</p>
+            <p style="margin:0;font-size:18px;font-weight:600;color:#fff;">🔥 Nova Proposta Estratégica</p>
+            <p style="margin:8px 0 0;font-size:13px;color:#666;">Formulário de Captura — ZACDA Tech v2</p>
           </td>
         </tr>
 
@@ -124,7 +126,7 @@ async function sendEmail(lead: LeadPayload, dbOk: boolean): Promise<void> {
         <tr>
           <td style="padding:0 40px 24px;">
             <p style="margin:0;font-size:12px;color:${dbOk ? '#00e5ff' : '#ff4444'};">
-              ${dbOk ? '✅ Lead salvo no Supabase' : '⚠️ Falha ao salvar no Supabase — verificar logs'}
+              ${dbOk ? '✅ Proposta salva no Supabase (tabela: propostas)' : '⚠️ Falha ao salvar no Supabase — verificar logs'}
             </p>
           </td>
         </tr>
@@ -149,7 +151,7 @@ async function sendEmail(lead: LeadPayload, dbOk: boolean): Promise<void> {
       from: `"ZACDA Site" <${process.env.ZOHO_EMAIL}>`,
       to: 'atendimento@zacda.com.br',
       replyTo: email,
-      subject: `[ZACDA] Novo Lead — ${name} | ${segmentLabel}`,
+      subject: `[ZACDA] Nova Proposta — ${name} | ${segmentLabel}`,
       html,
     })
     console.log('[Email] Enviado via Zoho SMTP. MessageId:', info.messageId)
@@ -174,53 +176,55 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Nome e e-mail são obrigatórios.' }, { status: 422 })
   }
 
-  // 1. Supabase — insere com colunas individuais (bypassa RLS via service_role)
+  // 1. Supabase — insere na tabela `propostas` (colunas em português, bypassa RLS via service_role)
   let dbOk = false
   try {
     const supabase = createAdminClient()
-    const { error: dbError } = await supabase.from('leads').insert([{
-      name:         name.trim(),
-      email:        email.trim(),
-      phone:        phone.trim() || null,
-      segment:      segment.trim() || null,
-      segment_label: segmentLabel.trim() || null,
-      digital_link: digitalLink.trim() || null,
-      vision:       vision.trim() || null,
+    const { error: dbError } = await supabase.from('propostas').insert([{
+      nome:           name.trim(),
+      email:          email.trim(),
+      telefone:       phone.trim()        || null,
+      segmento:       segment.trim()      || null,
+      segmento_label: segmentLabel.trim() || null,
+      link:           digitalLink.trim()  || null,
+      visao:          vision.trim()       || null,
+      status:         'novo',
     }])
     if (dbError) {
-      console.error('[Supabase] Erro:', dbError.message, dbError.code)
+      console.error('[Supabase] Erro ao salvar proposta:', dbError.message, dbError.code)
     } else {
       dbOk = true
-      console.log('[Supabase] Lead salvo:', email)
+      console.log('[Supabase] Proposta salva:', email)
     }
   } catch (e) {
     console.error('[Supabase] Exceção:', e)
   }
 
-  // 2. E-mail de alerta para a equipe (não bloqueia a resposta)
-  sendEmail(lead, dbOk).catch((e) =>
-    console.error('[Email] Falha silenciosa:', e)
-  )
+  // 2. E-mail de alerta para a equipe (assíncrono — não bloqueia o response)
+  sendEmail(lead, dbOk).catch((e) => console.error('[Email] Falha silenciosa:', e))
 
-  // 3. Normaliza telefone para formato internacional (55 + DDD + número)
+  // 3. Normaliza telefone → formato internacional brasileiro (55 + DDD + número)
   let cleanPhone = phone.replace(/\D/g, '')
   if (cleanPhone.length > 8 && !cleanPhone.startsWith('55')) {
     cleanPhone = '55' + cleanPhone
   }
 
-  // 4. WhatsApp de confirmação para o lead
+  // 4. WhatsApp de confirmação para o lead (delay 3s — parecer triagem humana)
   if (cleanPhone) {
     notifyWpp(
       cleanPhone,
-      `Olá ${name}! ✅ Recebemos sua requisição na ZACDA Tech.\n\nNossa IA já iniciou a triagem no setor de *${segmentLabel}*${digitalLink ? ` e está analisando seu link *${digitalLink}*` : ''}.\n\nNossa equipe entrará em contato em breve! 🦾\n\n_— ZACDA Digital Agency_`
+      `Olá ${name}! ✅ Recebemos sua proposta na ZACDA Tech.\n\nNossa IA já iniciou a triagem no setor de *${segmentLabel}*${digitalLink ? ` e está analisando seu link *${digitalLink}*` : ''}.\n\nNossa equipe entrará em contato em breve! 🦾\n\n_— ZACDA Digital Agency_`,
+      3000
     ).catch((e) => console.error('[WhatsApp] Lead notify failed:', e))
   }
 
-  // 5. WhatsApp de alerta para o admin
+  // 5. WhatsApp de alerta imediato para o admin
   notifyWpp(
     '5516993193919',
-    `🔥 *NOVO LEAD ZACDA!*\n\n👤 *Nome:* ${name}\n📧 *Email:* ${email}\n📱 *Telefone:* ${phone || 'Não informado'}\n🏢 *Segmento:* ${segmentLabel}\n🔗 *Link:* ${digitalLink || 'Não informado'}\n\n💬 *Objetivo:*\n"${vision}"\n\n_DB: ${dbOk ? '✅' : '❌ FALHOU'}_`
+    `🔥 *NOVA PROPOSTA ZACDA!*\n\n👤 *Nome:* ${name}\n📧 *Email:* ${email}\n📱 *Telefone:* ${phone || 'Não informado'}\n🏢 *Segmento:* ${segmentLabel}\n🔗 *Link:* ${digitalLink || 'Não informado'}\n\n💬 *Objetivo:*\n"${vision}"\n\n_DB: ${dbOk ? '✅ propostas' : '❌ FALHOU'}_`,
+    1000
   ).catch((e) => console.error('[WhatsApp] Admin notify failed:', e))
 
+  console.log('SISTEMAS ONLINE')
   return NextResponse.json({ success: true, digitalLink }, { status: 200 })
 }
