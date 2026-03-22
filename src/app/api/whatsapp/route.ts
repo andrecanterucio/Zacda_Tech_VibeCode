@@ -8,29 +8,29 @@ function buildFallbackResponse(msg: string): string {
     return `Olá! Bem-vindo à *ZACDA Digital Agency* 👋\n\nSou o assistente virtual da agência. Posso te ajudar com informações sobre:\n\n• 🌐 *Criação de Sites* profissionais\n• 🎨 *Identidade Visual* e Branding\n• 🤖 *Automações com IA*\n• 💼 *Planos e Preços*\n\nComo posso te ajudar hoje?`;
   }
   if (/\b(preco|valor|quanto|custo|investimento|plano|planos|mensalidade)\b/.test(m)) {
-    return `Nossos planos estratégicos:\n\n🚀 *START* — R$ 147/mês\nLanding Page + E-mail corporativo + WhatsApp\nSetup: R$ 497\n\n⭐ *GROW* — R$ 297/mês\nSite Institucional + SEO + Agente IA\nSetup: R$ 1.200\n\n💎 *PRO* — R$ 1.199/mês\nWeb App + CRM + Agente IA completo\nSetup: R$ 6.500\n\nQuer uma proposta personalizada? Acesse:\n👉 https://zacda-tech-vibe-code.vercel.app/#proposta`;
+    return `Nossos planos estratégicos:\n\n🚀 *START* — R$ 147/mês\nLanding Page + E-mail corporativo + WhatsApp\nSetup: R$ 497\n\n⭐ *GROW* — R$ 297/mês\nSite Institucional + SEO + Agente IA\nSetup: R$ 1.200\n\n💎 *PRO* — R$ 1.199/mês\nWeb App + CRM + Agente IA completo\nSetup: R$ 6.500\n\nQuer uma proposta personalizada? Acesse:\n👉 https://zacda.com.br/#proposta`;
   }
   if (/\b(site|website|loja|pagina|landing|ecommerce|loja virtual)\b/.test(m)) {
-    return `Criamos sites profissionais que *geram resultados reais* 🌐\n\nNossos sites incluem:\n✅ Design moderno e responsivo\n✅ SEO otimizado para aparecer no Google\n✅ Integração com WhatsApp e redes sociais\n✅ Painel de controle fácil de usar\n✅ Hospedagem inclusa no Vercel (EUA)\n\nQuer ver um exemplo? Você está vendo agora! 😄\nVamos criar o seu? → https://zacda-tech-vibe-code.vercel.app/#proposta`;
+    return `Criamos sites profissionais que *geram resultados reais* 🌐\n\nNossos sites incluem:\n✅ Design moderno e responsivo\n✅ SEO otimizado para aparecer no Google\n✅ Integração com WhatsApp e redes sociais\n✅ Painel de controle fácil de usar\n✅ Hospedagem inclusa em servidor VPS dedicado\n\nQuer ver um exemplo? Você está vendo agora! 😄\nVamos criar o seu? → https://zacda.com.br/#proposta`;
   }
   if (/\b(logo|marca|identidade|branding|visual|design|logotipo)\b/.test(m)) {
-    return `Criamos *identidades visuais completas* que posicionam sua marca acima da concorrência 🎨\n\nNosso processo:\n1️⃣ Briefing estratégico\n2️⃣ Pesquisa de mercado e concorrentes\n3️⃣ Desenvolvimento de conceito visual\n4️⃣ Logo em todas as variações (PNG, SVG, PDF)\n5️⃣ Manual de marca completo\n\nTudo integrado com seu site. Solicite sua proposta:\n👉 https://zacda-tech-vibe-code.vercel.app/#proposta`;
+    return `Criamos *identidades visuais completas* que posicionam sua marca acima da concorrência 🎨\n\nNosso processo:\n1️⃣ Briefing estratégico\n2️⃣ Pesquisa de mercado e concorrentes\n3️⃣ Desenvolvimento de conceito visual\n4️⃣ Logo em todas as variações (PNG, SVG, PDF)\n5️⃣ Manual de marca completo\n\nTudo integrado com seu site. Solicite sua proposta:\n👉 https://zacda.com.br/#proposta`;
   }
   if (/\b(ia|inteligencia artificial|automacao|chatbot|bot|agente)\b/.test(m)) {
-    return `Implementamos *Agentes de IA* que trabalham 24h por dia pelo seu negócio 🤖\n\nO que o agente faz:\n💬 Responde clientes automaticamente no WhatsApp\n📋 Qualifica leads e coleta informações\n📅 Agenda atendimentos na sua agenda\n📧 Envia propostas e follow-ups\n📊 Alimenta seu CRM automaticamente\n\nVocê está falando com um agora! Quer um igual para o seu negócio?\n👉 https://zacda-tech-vibe-code.vercel.app/#proposta`;
+    return `Implementamos *Agentes de IA* que trabalham 24h por dia pelo seu negócio 🤖\n\nO que o agente faz:\n💬 Responde clientes automaticamente no WhatsApp\n📋 Qualifica leads e coleta informações\n📅 Agenda atendimentos na sua agenda\n📧 Envia propostas e follow-ups\n📊 Alimenta seu CRM automaticamente\n\nVocê está falando com um agora! Quer um igual para o seu negócio?\n👉 https://zacda.com.br/#proposta`;
   }
   if (/\b(prazo|tempo|dias|semanas|rapido|urgente|quando|entrega)\b/.test(m)) {
-    return `Nossos prazos de entrega:\n\n⚡ *Landing Page (START)*: 5-7 dias úteis\n🏗️ *Site Institucional (GROW)*: 10-15 dias úteis\n🚀 *Web App completo (PRO)*: 30-45 dias úteis\n\nApós aprovação do projeto e pagamento do setup.\n\nQuer começar? Preencha sua proposta:\n👉 https://zacda-tech-vibe-code.vercel.app/#proposta`;
+    return `Nossos prazos de entrega:\n\n⚡ *Landing Page (START)*: 5-7 dias úteis\n🏗️ *Site Institucional (GROW)*: 10-15 dias úteis\n🚀 *Web App completo (PRO)*: 30-45 dias úteis\n\nApós aprovação do projeto e pagamento do setup.\n\nQuer começar? Preencha sua proposta:\n👉 https://zacda.com.br/#proposta`;
   }
   if (/\b(proposta|contato|falar|conversar|reuniao|agendar|agenda)\b/.test(m)) {
-    return `Perfeito! Para enviar sua proposta e entrar em contato com nossa equipe:\n\n👉 *Formulário online*: https://zacda-tech-vibe-code.vercel.app/#proposta\n\nOu se preferir, me informe:\n• 👤 Seu nome\n• 🏢 Seu segmento de negócio\n• 🎯 O que você precisa\n\nE eu te coloco em contato com o time! 🦾`;
+    return `Perfeito! Para enviar sua proposta e entrar em contato com nossa equipe:\n\n👉 *Formulário online*: https://zacda.com.br/#proposta\n\nOu se preferir, me informe:\n• 👤 Seu nome\n• 🏢 Seu segmento de negócio\n• 🎯 O que você precisa\n\nE eu te coloco em contato com o time! 🦾`;
   }
   if (/\b(obrigado|obrigada|valeu|thanks|grato|grata)\b/.test(m)) {
     return `Disponha! É um prazer atender você 😊\n\nSe precisar de qualquer coisa, pode falar comigo a qualquer hora.\n\n_ZACDA Digital Agency — Arquitetando Legados Digitais_`;
   }
 
   // Default
-  return `Entendido! 👍\n\nPara que eu possa te ajudar melhor, pode me falar um pouco mais sobre o que você precisa?\n\nNa *ZACDA Digital Agency* trabalhamos com:\n🌐 Sites profissionais\n🎨 Identidade visual\n🤖 Automações com IA\n\nOu acesse nosso site para saber mais:\n👉 https://zacda-tech-vibe-code.vercel.app`;
+  return `Entendido! 👍\n\nPara que eu possa te ajudar melhor, pode me falar um pouco mais sobre o que você precisa?\n\nNa *ZACDA Digital Agency* trabalhamos com:\n🌐 Sites profissionais\n🎨 Identidade visual\n🤖 Automações com IA\n\nOu acesse nosso site para saber mais:\n👉 https://zacda.com.br`;
 }
 
 // ── Envia mensagem via Evolution API (com timeout de 8s) ──────────────────────
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
 Tom: profissional, caloroso, persuasivo. Como um consultor de vendas experiente.
 Contexto: Responda APENAS sobre criação de sites, identidade visual, branding, automações com IA, preços da agência.
 Planos: START R$147/mês (Landing Page), GROW R$297/mês (Site Institucional + SEO + Agente IA), PRO R$1.199/mês (Web App + CRM).
-Site: https://zacda-tech-vibe-code.vercel.app
+Site: https://zacda.com.br
 Seja conciso (máx. 5 linhas). Use emojis com moderação. Quebre linhas para facilitar leitura no WhatsApp.
 Se perguntar sobre algo fora do escopo, redirecione educadamente para a agência.`;
 

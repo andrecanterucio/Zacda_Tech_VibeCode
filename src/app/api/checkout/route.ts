@@ -49,7 +49,7 @@ export async function POST(req: Request) {
   }
 
   const planData = PLANS[plan]
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zacda-tech-vibe-code.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zacda.com.br'
 
   try {
     const stripe = new Stripe(secretKey)
